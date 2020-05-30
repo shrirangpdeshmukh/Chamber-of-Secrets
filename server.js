@@ -12,6 +12,7 @@ mongoose
     useCreateIndex: true,
     useUnifiedTopology: true,
     useFindAndModify: false,
+    autoIndex: true,
   })
   .then((con) => {
     //console.log(con.connections);

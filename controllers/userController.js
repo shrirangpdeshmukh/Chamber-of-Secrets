@@ -1,19 +1,19 @@
 const User = require("./../models/userModel");
 
-exports.createUser = async (req, res) => {
+exports.createUser = async (req, res, next) => {
   try {
     const newDoc = await User.create(req.body);
 
     res.status(200).json({
       status: "success",
       data: {
-        doc: newDoc,
+        newDoc,
       },
     });
   } catch (err) {
-    res.status(500).json({
+    res.status(400).json({
       status: "error",
-      message: err.message,
+      message: err,
     });
   }
 };
@@ -30,7 +30,7 @@ exports.getAllUsers = async (req, res) => {
       },
     });
   } catch (err) {
-    res.status(500).json({
+    res.status(404).json({
       status: "error",
       message: err.message,
     });
