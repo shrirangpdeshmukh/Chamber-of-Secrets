@@ -1,32 +1,32 @@
-const User = require("./../models/userModel");
+const Post = require("./../models/postModel");
 
-exports.createUser = async (req, res, next) => {
+exports.createReview = async (req, res, next) => {
   try {
-    const newDoc = await User.create(req.body);
+    const newPost = await Post.create(req.body);
 
     res.status(200).json({
       status: "success",
       data: {
-        newDoc,
+        post: newPost,
       },
     });
   } catch (err) {
     res.status(400).json({
       status: "error",
-      message: err,
+      message: err.message,
     });
   }
 };
 
-exports.getAllUsers = async (req, res, next) => {
+exports.getAllPosts = async (req, res, next) => {
   try {
-    const docs = await User.find();
+    const posts = await Post.find();
 
     res.status(200).json({
       status: "success",
-      results: docs.length,
+      results: posts.length,
       data: {
-        doc: docs,
+        post: posts,
       },
     });
   } catch (err) {
