@@ -36,3 +36,48 @@ exports.getAllPosts = async (req, res, next) => {
     });
   }
 };
+
+exports.deletePost = async (req, res, next) => {
+  try {
+    const post = await Post.findByIdAndDelete(req.params.id);
+
+    if (!post) {
+      res.send("No post with this id found");
+      next();
+    }
+    res.status(204).json({
+      status: "success",
+      message: "post successfully deleted",
+      post,
+    });
+  } catch (err) {
+    res.status(400).json({
+      status: "error",
+      message: err.message,
+    });
+  }
+};
+
+exports.updatePost = async (req, res, next) => {
+  try {
+    const post = await Post.findByIdAndUpdate(req.params.id, req.body, {
+      new: true,
+      runValidators: true,
+    });
+
+    if (!post) {
+      res.send("No post with this id found");
+      next();
+    }
+    res.status(200).json({
+      status: "success",
+      message: "post successfully updated",
+      post,
+    });
+  } catch (err) {
+    res.status(400).json({
+      status: "error",
+      message: err.message,
+    });
+  }
+};
