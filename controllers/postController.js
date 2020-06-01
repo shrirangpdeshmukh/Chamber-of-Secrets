@@ -52,3 +52,31 @@ exports.updatePost = catchAsync(async (req, res, next) => {
     post,
   });
 });
+
+exports.blacklistPost = catchAsync(async (req, res, next) => {
+  const post = await Post.findByIdAndUpdate(req.params.id, {
+    blacklisted: true,
+    blacklistedBy: req.user.id,
+  });
+
+  if (!post) {
+    return next(new AppError("No post with this id", 404));
+  }
+  res.status(200).json({
+    status: "success",
+    message: "Blacklisted successfully",
+  });
+});
+
+exports.getPost = catchAsync(async (req, res, next) => {
+  const post = await Post.findById(req.params.id);
+
+  if (!post) {
+    return next(new AppError("No post with this id", 404));
+  }
+
+  res.status(200).json({
+    status: "success",
+    data: post,
+  });
+});

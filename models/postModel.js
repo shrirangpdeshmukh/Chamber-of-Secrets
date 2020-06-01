@@ -21,7 +21,11 @@ const postSchema = new mongoose.Schema({
   blacklisted: {
     type: Boolean,
     default: false,
-    select: false,
+  },
+
+  blacklistedBy: {
+    type: mongoose.Schema.ObjectId,
+    ref: "User",
   },
 });
 
