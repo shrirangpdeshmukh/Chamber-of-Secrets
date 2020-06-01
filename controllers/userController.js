@@ -1,82 +1,55 @@
+const catchAsync = require("./../utils/catchAsync");
+const AppError = require("./../utils/appError");
 const User = require("./../models/userModel");
 
-exports.createUser = async (req, res, next) => {
-  try {
-    const newDoc = await User.create(req.body);
+exports.createUser = catchAsync(async (req, res, next) => {
+  const newDoc = await User.create(req.body);
 
-    res.status(200).json({
-      status: "success",
-      data: {
-        newDoc,
-      },
-    });
-  } catch (err) {
-    res.status(400).json({
-      status: "error",
-      message: err,
-    });
+  res.status(200).json({
+    status: "success",
+    data: {
+      newDoc,
+    },
+  });
+});
+
+exports.getAllUsers = catchAsync(async (req, res, next) => {
+  const docs = await User.find();
+
+  res.status(200).json({
+    status: "success",
+    results: docs.length,
+    data: {
+      doc: docs,
+    },
+  });
+});
+
+exports.deleteUser = catchAsync(async (req, res, next) => {
+  const user = await User.findByIdAndDelete(req.params.id);
+
+  if (!user) {
+    return next(new AppError(`No User find with id ${req.params.id}`, 404));
   }
-};
+  res.status(204).json({
+    status: "success",
+    message: "post successfully deleted",
+    user,
+  });
+});
 
-exports.getAllUsers = async (req, res, next) => {
-  try {
-    const docs = await User.find();
+exports.updateUser = catchAsync(async (req, res, next) => {
+  const user = await User.findByIdAndUpdate(req.params.id, req.body, {
+    new: true,
+    runValidators: true,
+  });
 
-    res.status(200).json({
-      status: "success",
-      results: docs.length,
-      data: {
-        doc: docs,
-      },
-    });
-  } catch (err) {
-    res.status(404).json({
-      status: "error",
-      message: err.message,
-    });
+  if (!user) {
+    return next(new AppError(`No User find with id ${req.params.id}`, 404));
   }
-};
-exports.deleteUser = async (req, res, next) => {
-  try {
-    const user = await User.findByIdAndDelete(req.params.id);
-
-    if (!user) {
-      res.send("No user with this id found");
-      next();
-    }
-    res.status(204).json({
-      status: "success",
-      message: "post successfully deleted",
-      user,
-    });
-  } catch (err) {
-    res.status(400).json({
-      status: "error",
-      message: err.message,
-    });
-  }
-};
-
-exports.updateUser = async (req, res, next) => {
-  try {
-    const user = await User.findByIdAndUpdate(req.params.id, req.body, {
-      new: true,
-      runValidators: true,
-    });
-
-    if (!user) {
-      res.send("No user with this id found");
-      next();
-    }
-    res.status(200).json({
-      status: "success",
-      message: "user successfully updated",
-      user,
-    });
-  } catch (err) {
-    res.status(400).json({
-      status: "error",
-      message: err.message,
-    });
-  }
-};
+  res.status(200).json({
+    status: "success",
+    message: "user successfully updated",
+    user,
+  });
+});

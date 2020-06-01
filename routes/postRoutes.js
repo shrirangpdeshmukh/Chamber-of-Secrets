@@ -7,7 +7,7 @@ const router = express.Router();
 router
   .route("/")
   .get(postController.getAllPosts)
-  .post(postController.createReview);
+  .post(postController.createPost);
 
 router
   .route("/:id")
