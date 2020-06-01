@@ -43,6 +43,8 @@ const userSchema = new mongoose.Schema({
     type: Boolean,
     default: false,
   },
+
+  passwordChangedTime: Date,
 });
 
 userSchema.pre("save", async function (next) {
