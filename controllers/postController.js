@@ -80,3 +80,31 @@ exports.getPost = catchAsync(async (req, res, next) => {
     data: post,
   });
 });
+
+exports.upvotePost = catchAsync(async (req, res, next) => {
+  const post = await Post.findById(req.params.id);
+
+  if (!post) {
+    return next(new AppError("No post with this id", 404));
+  }
+  post.upvotedBy.push(req.user.id);
+  await post.save();
+  res.status(200).json({
+    status: "success",
+    data: post,
+  });
+});
+
+exports.downvotePost = catchAsync(async (req, res, next) => {
+  const post = await Post.findById(req.params.id);
+
+  if (!post) {
+    return next(new AppError("No post with this id", 404));
+  }
+  post.downvotedBy.push(req.user.id);
+  await post.save();
+  res.status(200).json({
+    status: "success",
+    data: post,
+  });
+});

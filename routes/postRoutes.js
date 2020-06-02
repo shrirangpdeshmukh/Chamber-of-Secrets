@@ -12,6 +12,19 @@ router.patch(
   postController.blacklistPost
 );
 
+router.post(
+  "/:id/upvote",
+  authController.protect,
+  authController.restrictTo("admin", "user"),
+  postController.upvotePost
+);
+router.post(
+  "/:id/downvote",
+  authController.protect,
+  authController.restrictTo("admin", "user"),
+  postController.downvotePost
+);
+
 router
   .route("/")
   .get(postController.getAllPosts)
