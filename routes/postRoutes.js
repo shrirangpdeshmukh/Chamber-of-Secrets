@@ -28,7 +28,7 @@ router.post(
 router
   .route("/")
   .get(postController.getAllPosts)
-  .post(postController.createPost);
+  .post(authController.protect, postController.createPost);
 
 router
   .route("/:id")

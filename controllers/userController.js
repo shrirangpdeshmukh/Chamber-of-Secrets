@@ -13,6 +13,19 @@ exports.createUser = catchAsync(async (req, res, next) => {
   });
 });
 
+exports.getUser = catchAsync(async (req, res, next) => {
+  const user = await User.findById(req.params.id);
+
+  if (!user) {
+    return next(new AppError("No user with this id", 404));
+  }
+
+  res.status(200).json({
+    status: "success",
+    data: user,
+  });
+});
+
 exports.getAllUsers = catchAsync(async (req, res, next) => {
   const docs = await User.find();
 
@@ -51,18 +64,5 @@ exports.updateUser = catchAsync(async (req, res, next) => {
     status: "success",
     message: "user successfully updated",
     user,
-  });
-});
-
-exports.getUser = catchAsync(async (req, res, next) => {
-  const user = await User.findById(req.params.id);
-
-  if (!user) {
-    return next(new AppError("No user with this id", 404));
-  }
-
-  res.status(200).json({
-    status: "success",
-    data: user,
   });
 });

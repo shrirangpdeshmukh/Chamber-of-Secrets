@@ -3,6 +3,8 @@ const AppError = require("./../utils/appError");
 const catchAsync = require("./../utils/catchAsync");
 
 exports.createPost = catchAsync(async (req, res, next) => {
+  if (!req.body.user) req.body.user = req.user.id;
+
   const newPost = await Post.create(req.body);
 
   res.status(200).json({
@@ -10,6 +12,19 @@ exports.createPost = catchAsync(async (req, res, next) => {
     data: {
       post: newPost,
     },
+  });
+});
+
+exports.getPost = catchAsync(async (req, res, next) => {
+  const post = await Post.findById(req.params.id);
+
+  if (!post) {
+    return next(new AppError("No post with this id", 404));
+  }
+
+  res.status(200).json({
+    status: "success",
+    data: post,
   });
 });
 
@@ -62,22 +77,10 @@ exports.blacklistPost = catchAsync(async (req, res, next) => {
   if (!post) {
     return next(new AppError("No post with this id", 404));
   }
+
   res.status(200).json({
     status: "success",
     message: "Blacklisted successfully",
-  });
-});
-
-exports.getPost = catchAsync(async (req, res, next) => {
-  const post = await Post.findById(req.params.id);
-
-  if (!post) {
-    return next(new AppError("No post with this id", 404));
-  }
-
-  res.status(200).json({
-    status: "success",
-    data: post,
   });
 });
 
@@ -87,7 +90,18 @@ exports.upvotePost = catchAsync(async (req, res, next) => {
   if (!post) {
     return next(new AppError("No post with this id", 404));
   }
-  post.upvotedBy.push(req.user.id);
+  const user_id = req.user.id;
+  //Check if this user has already upvoted  if (yes) remove the upvote  if (no) down vote
+  const checkUserUpvote = post.upvotedBy.indexOf(user_id);
+  if (checkUserUpvote === -1) post.upvotedBy.push(user_id);
+  else post.upvotedBy.splice(checkUserUpvote, 1);
+
+  // check if the user has alrady downvoted also
+  const checkUserDownvote = post.downvotedBy.indexOf(user_id);
+  if (checkUserDownvote !== -1) {
+    post.downvotedBy.splice(checkUserDownvote, 1);
+  }
+
   await post.save();
   res.status(200).json({
     status: "success",
@@ -97,11 +111,22 @@ exports.upvotePost = catchAsync(async (req, res, next) => {
 
 exports.downvotePost = catchAsync(async (req, res, next) => {
   const post = await Post.findById(req.params.id);
-
+  const user_id = req.user.id;
   if (!post) {
     return next(new AppError("No post with this id", 404));
   }
-  post.downvotedBy.push(req.user.id);
+
+  //Check if this user has already downvoted  if (yes) remove the downvote  if (no) down vote
+  const checkUserDownvote = post.downvotedBy.indexOf(user_id);
+  if (checkUserDownvote === -1) post.downvotedBy.push(user_id);
+  else post.downvotedBy.splice(checkUserDownvote, 1);
+
+  // check if the user has alrady upvoted also
+  const checkUserUpvote = post.upvotedBy.indexOf(user_id);
+  if (checkUserUpvote !== -1) {
+    post.upvotedBy.splice(checkUserUpvote, 1);
+  }
+
   await post.save();
   res.status(200).json({
     status: "success",
