@@ -1,88 +1,25 @@
 const Post = require("./../models/postModel");
 const AppError = require("./../utils/appError");
 const catchAsync = require("./../utils/catchAsync");
+const handler = require("./handler");
 
-exports.createPost = catchAsync(async (req, res, next) => {
+exports.setUserID = (req, res, next) => {
   if (!req.body.user) req.body.user = req.user.id;
 
-  const newPost = await Post.create(req.body);
+  next();
+};
 
-  res.status(200).json({
-    status: "success",
-    data: {
-      post: newPost,
-    },
-  });
-});
+exports.createPost = handler.createOne(Post);
 
-exports.getPost = catchAsync(async (req, res, next) => {
-  const post = await Post.findById(req.params.id);
+exports.getPost = handler.getOne(Post);
 
-  if (!post) {
-    return next(new AppError("No post with this id", 404));
-  }
+exports.getAllPosts = handler.getAll(Post);
 
-  res.status(200).json({
-    status: "success",
-    data: post,
-  });
-});
+exports.deletePost = handler.deleteOne(Post);
 
-exports.getAllPosts = catchAsync(async (req, res, next) => {
-  const posts = await Post.find();
+exports.updatePost = handler.updateOne(Post);
 
-  res.status(200).json({
-    status: "success",
-    results: posts.length,
-    data: {
-      post: posts,
-    },
-  });
-});
-
-exports.deletePost = catchAsync(async (req, res, next) => {
-  const post = await Post.findByIdAndDelete(req.params.id);
-
-  if (!post) {
-    return next(new AppError("No post with this id", 404));
-  }
-  res.status(204).json({
-    status: "success",
-    message: "post successfully deleted",
-    post,
-  });
-});
-
-exports.updatePost = catchAsync(async (req, res, next) => {
-  const post = await Post.findByIdAndUpdate(req.params.id, req.body, {
-    new: true,
-    runValidators: true,
-  });
-  if (!post) {
-    return next(new AppError("No post with this id", 404));
-  }
-  res.status(200).json({
-    status: "success",
-    message: "post successfully updated",
-    post,
-  });
-});
-
-exports.blacklistPost = catchAsync(async (req, res, next) => {
-  const post = await Post.findByIdAndUpdate(req.params.id, {
-    blacklisted: true,
-    blacklistedBy: req.user.id,
-  });
-
-  if (!post) {
-    return next(new AppError("No post with this id", 404));
-  }
-
-  res.status(200).json({
-    status: "success",
-    message: "Blacklisted successfully",
-  });
-});
+exports.blacklistPost = handler.blacklistOne(Post);
 
 exports.upvotePost = catchAsync(async (req, res, next) => {
   const post = await Post.findById(req.params.id);

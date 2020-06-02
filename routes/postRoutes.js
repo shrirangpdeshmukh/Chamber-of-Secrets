@@ -3,7 +3,7 @@ const authController = require("./../controllers/authController");
 
 const express = require("express");
 
-const router = express.Router();
+const router = express.Router({ mergeParams: true });
 
 router.patch(
   "/:id/blacklist",
@@ -28,7 +28,11 @@ router.post(
 router
   .route("/")
   .get(postController.getAllPosts)
-  .post(authController.protect, postController.createPost);
+  .post(
+    authController.protect,
+    postController.setUserID,
+    postController.createPost
+  );
 
 router
   .route("/:id")

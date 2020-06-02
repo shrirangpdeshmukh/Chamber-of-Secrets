@@ -44,6 +44,11 @@ const userSchema = new mongoose.Schema({
     default: false,
   },
 
+  blacklistedBy: {
+    type: mongoose.Schema.ObjectId,
+    ref: "User",
+  },
+
   passwordChangedTime: Date,
 });
 

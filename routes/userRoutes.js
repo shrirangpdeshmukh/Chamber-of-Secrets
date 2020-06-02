@@ -2,11 +2,20 @@ const express = require("express");
 
 const userController = require("./../controllers/userController");
 const authController = require("./../controllers/authController");
-
+const postRouter = require("./postRoutes");
 const router = express.Router();
+
+router.use("/:userId/posts", postRouter);
 
 router.post("/login", authController.login);
 router.post("/signup", authController.signup);
+
+router.post(
+  "/:id/blacklist",
+  authController.protect,
+  authController.restrictTo("admin"),
+  userController.blacklistUser
+);
 
 router
   .route("/")
