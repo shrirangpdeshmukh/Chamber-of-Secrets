@@ -71,25 +71,3 @@ exports.downvotePost = catchAsync(async (req, res, next) => {
     data: post,
   });
 });
-
-/*exports.blacklistAllPostByUser = catchAsync(async (req, res, next) => {
-  const user = await User.findById(req.params.id);
-
-  const docs = await Post.find({ user: user._id });
-
-  docs.forEach(
-    catchAsync(async (doc) => {
-      await Post.findByIdAndUpdate(doc._id, {
-        blacklisted: true,
-        blacklistedBy: user._id,
-      });
-    })
-  );
-
-  res.status(200).json({
-    status: "success",
-    message: "All Posts blacklisted",
-    name: user.name,
-  });
-  next();
-});*/

@@ -57,7 +57,7 @@ exports.deleteOne = (Model) =>
     res.status(204).json({
       status: "success",
       message: "Document successfully deleted",
-      user,
+      doc,
     });
   });
 
