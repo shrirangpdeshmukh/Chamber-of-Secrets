@@ -111,3 +111,24 @@ exports.checkCorrectUser = catchAsync(async (req, res, next) => {
   }
   next();
 });
+
+exports.guestSession = catchAsync(async (req, res, next) => {
+  const guest = await User.find({ name: "Guest" });
+  //console.log(guest);
+  const token = signToken(guest._id);
+
+  res.status(200).json({
+    status: "success",
+    token,
+    message:
+      "Guest session has been created, you can create posts but not modify/delete , upvote/downvote them.",
+  });
+});
+
+exports.logout = catchAsync(async (req, res, next) => {
+  res.status(200).json({
+    status: "success",
+    //user: req.user,
+    message: "Logged Out succesfully",
+  });
+});

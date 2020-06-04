@@ -9,6 +9,8 @@ router.use("/:userId/myPosts", postRouter);
 
 router.post("/login", authController.login);
 router.post("/signup", authController.signup);
+router.post("/guestSession", authController.guestSession);
+router.post("/logout", authController.protect, authController.logout);
 
 router.post(
   "/:id/blacklist",
