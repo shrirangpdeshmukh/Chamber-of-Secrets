@@ -32,7 +32,9 @@ exports.login = catchAsync(async (req, res, next) => {
     return next(new AppError("Please provide a valid email and password", 400));
   }
 
-  const user = await User.findOne({ email: email }).select("+password");
+  const user = await User.findOne({ email: email, verified: true }).select(
+    "+password"
+  );
 
   if (!user || !(await user.correctPassword(password, user.password))) {
     return next(new AppError("Invalid Email or Password", 401));
@@ -44,17 +46,57 @@ exports.login = catchAsync(async (req, res, next) => {
 exports.signup = catchAsync(async (req, res, next) => {
   const newUser = await User.create(req.body);
 
-  createToken(newUser, 201, res);
+  const signToken = newUser.createSignUpToken();
+  await newUser.save({ validateBeforeSave: false });
+
+  const signupURL = `${req.protocol}://${req.get(
+    "host"
+  )}/api/users/signUpConfirm/${signToken}`;
+
+  const message = `You are just one Step to begin your fabulous journey on Chamber Of Secrets\n Submit a Patch request to ${signupURL}.\n This URL is valid for 10 mins`;
+
+  try {
+    await sendEmail({
+      email: newUser.email,
+      subject: "Your SignUp Confirmation Token {Valid for 10 min}",
+      message,
+    });
+
+    res.status(200).json({
+      status: "success",
+      message: "Token sent to mail",
+    });
+  } catch (err) {
+    newUser.signUpToken = undefined;
+    newUser.signUpTokenExpires = undefined;
+    await user.save({ validateBeforeSave: false });
+
+    return next(new AppError("There was an error sending email"), 500);
+  }
 });
 
-exports.restrictTo = (...roles) => {
-  return (req, res, next) => {
-    if (!roles.includes(req.user.role)) {
-      return next(new AppError("You are not authorized to this", 403));
-    }
-    next();
-  };
-};
+exports.signUpConfirm = catchAsync(async (req, res, next) => {
+  const hashedToken = crypto
+    .createHash("sha256")
+    .update(req.params.token)
+    .digest("hex");
+  console.log(hashedToken);
+  const user = await User.findOne({
+    signUpToken: hashedToken,
+    signUpTokenExpires: { $gt: Date.now() },
+  });
+
+  if (!user) {
+    return next(new AppError("Token is invalid"));
+  }
+
+  user.verified = true;
+  user.signUpToken = undefined;
+  user.signupTokenExpires = undefined;
+  await user.save({ validateBeforeSave: false });
+
+  createToken(user, 200, res);
+});
 
 exports.protect = catchAsync(async (req, res, next) => {
   //1 Get Token and check if there
@@ -94,6 +136,15 @@ exports.protect = catchAsync(async (req, res, next) => {
   req.user = freshUser;
   next();
 });
+
+exports.restrictTo = (...roles) => {
+  return (req, res, next) => {
+    if (!roles.includes(req.user.role)) {
+      return next(new AppError("You are not authorized to this", 403));
+    }
+    next();
+  };
+};
 
 exports.checkCorrectUser = catchAsync(async (req, res, next) => {
   const post = await Post.findById(req.params.id);
@@ -140,7 +191,7 @@ exports.forgotPassword = catchAsync(async (req, res, next) => {
     email: req.body.email,
     role: { $ne: "guest" },
   });
-  console.log(user);
+  //console.log(user);
   if (!user) {
     return next(new AppError("No user with that email", 404));
   }
@@ -148,13 +199,13 @@ exports.forgotPassword = catchAsync(async (req, res, next) => {
   const resetToken = user.createPasswordResetToken();
   await user.save({ validateBeforeSave: false });
   //Send it to user email
-  console.log(user);
+  //console.log(user);
 
   const resetURL = `${req.protocol}://${req.get(
     "host"
   )}/api/users/resetPassword/${resetToken}`;
 
-  const message = `Forgot your password? Submit a PATCH request with your new password and passwordConfirm to: ${resetURL}.\nIf you didn't forget your password, please ignore this email!`;
+  const message = `Forgot your password? \nSubmit a PATCH request with your new password and passwordConfirm to: ${resetURL}.\nIf you didn't forget your password, please ignore this email!`;
 
   try {
     await sendEmail({
@@ -188,7 +239,7 @@ exports.resetPassword = catchAsync(async (req, res, next) => {
   });
 
   if (!user) {
-    return next(new AppError("Token is invalld or expired", 400));
+    return next(new AppError("Token is invalid or expired", 400));
   }
 
   user.password = req.body.password;

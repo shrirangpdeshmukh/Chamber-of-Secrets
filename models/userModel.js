@@ -49,6 +49,13 @@ const userSchema = new mongoose.Schema({
     type: mongoose.Schema.ObjectId,
     ref: "User",
   },
+  verified: {
+    type: Boolean,
+    default: false,
+  },
+
+  signUpToken: String,
+  signUpTokenExpires: Date,
 
   passwordChangedTime: Date,
   passwordResetToken: String,
@@ -78,12 +85,27 @@ userSchema.methods.createPasswordResetToken = function () {
     .update(resetToken)
     .digest("hex");
 
-  console.log({ resetToken }, this.passwordResetToken);
+  //console.log({ resetToken }, this.passwordResetToken);
 
   this.passwordResetTokenExpires = Date.now() + 10 * 60 * 1000;
 
   return resetToken;
 };
 
+userSchema.methods.createSignUpToken = function () {
+  const signToken = crypto.randomBytes(32).toString("hex");
+
+  this.signUpToken = crypto
+    .createHash("sha256")
+    .update(signToken)
+    .digest("hex");
+
+  console.log(signToken);
+  console.log(this.signUpToken);
+
+  this.signUpTokenExpires = Date.now() + 10 * 60 * 1000;
+
+  return signToken;
+};
 const User = mongoose.model("User", userSchema);
 module.exports = User;
