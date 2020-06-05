@@ -40,6 +40,10 @@ exports.login = catchAsync(async (req, res, next) => {
     return next(new AppError("Invalid Email or Password", 401));
   }
 
+  if (!user.blacklisted) {
+    return next(new AppError("You have been blacklisted by our admin", 403));
+  }
+
   createToken(user, 200, res);
 });
 
