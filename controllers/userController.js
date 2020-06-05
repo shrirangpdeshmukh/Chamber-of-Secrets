@@ -2,6 +2,7 @@ const User = require("./../models/userModel");
 const Post = require("./../models/postModel");
 const handler = require("./handler");
 const AppError = require("./../utils/appError");
+const sendEmail = require("./../utils/sendEmail");
 const catchAsync = require("./../utils/catchAsync");
 
 exports.createUser = handler.createOne(User);
@@ -35,8 +36,21 @@ exports.blacklistUser = catchAsync(async (req, res, next) => {
     })
   );
 
+  const message = `You have been blacklisted by one of the admin members of our site.`;
+
+  try {
+    await sendEmail({
+      email: user.email,
+      subject: "You have Blacklisted from the Chamber of Secrets",
+      message,
+    });
+  } catch (err) {
+    return next(new AppError("There was an error sending email"), 500);
+  }
+
   res.status(200).json({
     status: "success",
-    message: "User and All his posts successfully blacklisted",
+    message:
+      "User and All his posts successfully blacklisted\n Token sent to mail",
   });
 });
