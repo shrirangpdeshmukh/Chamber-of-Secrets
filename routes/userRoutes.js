@@ -10,9 +10,11 @@ router.use("/:userId/myPosts", postRouter);
 router.post("/login", authController.login);
 router.post("/signup", authController.signup);
 router.post("/guestSession", authController.guestSession);
+router.post("/forgotPassword", authController.forgotPassword);
+router.patch("/resetPassword/:token", authController.resetPassword);
 router.post("/logout", authController.protect, authController.logout);
 
-router.post(
+router.patch(
   "/:id/blacklist",
   authController.protect,
   authController.restrictTo("admin"),
