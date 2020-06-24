@@ -67,7 +67,7 @@ exports.getAll = (Model) =>
     let filter = {};
     if (req.params.userId) filter = { user: req.params.userId };
 
-    const features = new QuerySelector(Model.find(filter), req.query)
+    let features = new QuerySelector(Model.find(filter), req.query)
       .filter()
       .sort()
       .limit()

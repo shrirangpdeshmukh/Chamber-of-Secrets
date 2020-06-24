@@ -40,7 +40,7 @@ exports.login = catchAsync(async (req, res, next) => {
     return next(new AppError("Invalid Email or Password", 401));
   }
 
-  if (!user.blacklisted) {
+  if (user.blacklisted) {
     return next(new AppError("You have been blacklisted by our admin", 403));
   }
 
@@ -84,7 +84,7 @@ exports.signUpConfirm = catchAsync(async (req, res, next) => {
     .createHash("sha256")
     .update(req.params.token)
     .digest("hex");
-  console.log(hashedToken);
+  // console.log(hashedToken);
   const user = await User.findOne({
     signUpToken: hashedToken,
     signUpTokenExpires: { $gt: Date.now() },

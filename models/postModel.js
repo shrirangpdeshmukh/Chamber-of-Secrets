@@ -57,10 +57,15 @@ postSchema.virtual("downvotes").get(function () {
   return this.downvotedBy.length;
 });
 
-/*postSchema.pre(/^find/, function (next) {
-  this.find({ blacklisted: { $ne: true } });
+postSchema.pre(/^find/, function (next) {
+  this.populate({ path: "user", select: "name" });
   next();
-});*/
+});
+
+postSchema.pre(/^find/, function (next) {
+  this.find({ blacklisted: { $ne: true }, user: { $ne: null } });
+  next();
+});
 
 const Post = mongoose.model("Post", postSchema);
 module.exports = Post;

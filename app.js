@@ -1,14 +1,14 @@
 const express = require("express");
 const morgan = require("morgan");
 //dotenv.config({ path: "./config.env" });
-
+const cors = require("cors");
 //const mongoose = require("mongoose");
 const AppError = require("./utils/appError.js");
 const errorHandler = require("./controllers/errorController1");
 const userRouter = require("./routes/userRoutes.js");
 const postRouter = require("./routes/postRoutes.js");
 const app = express();
-
+app.use(cors());
 app.use(express.json());
 app.use(morgan("dev"));
 app.use("/api/users", userRouter);
