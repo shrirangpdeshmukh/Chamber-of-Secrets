@@ -13,6 +13,12 @@ const signToken = (id) => {
 
 const createToken = (user, statusCode, res) => {
   const token = signToken(user._id);
+  const cookieOptions = {
+    httpOnly: true,
+  };
+  // cookieOptions.secure = true;
+
+  res.cookie("jwt", token, cookieOptions);
 
   res.status(statusCode).json({
     status: "success",
@@ -57,7 +63,7 @@ exports.signup = catchAsync(async (req, res, next) => {
     "host"
   )}/api/users/signUpConfirm/${signToken}`;
 
-  const message = `You are just one Step to begin your fabulous journey on Chamber Of Secrets\n Submit a Patch request to ${signupURL}.\n This URL is valid for 10 mins`;
+  const message = `You are just one Step to begin your fabulous journey on Chamber Of Secrets\n Paste ${signToken} in the dialog box on your screen.\n This Code is valid for 10 mins`;
 
   try {
     await sendEmail({
@@ -82,7 +88,7 @@ exports.signup = catchAsync(async (req, res, next) => {
 exports.signUpConfirm = catchAsync(async (req, res, next) => {
   const hashedToken = crypto
     .createHash("sha256")
-    .update(req.params.token)
+    .update(req.body.token)
     .digest("hex");
   // console.log(hashedToken);
   const user = await User.findOne({
@@ -91,7 +97,7 @@ exports.signUpConfirm = catchAsync(async (req, res, next) => {
   });
 
   if (!user) {
-    return next(new AppError("Token is invalid"));
+    return next(new AppError("Token is invalid"), 403);
   }
 
   user.verified = true;
@@ -103,15 +109,16 @@ exports.signUpConfirm = catchAsync(async (req, res, next) => {
 });
 
 exports.protect = catchAsync(async (req, res, next) => {
-  //1 Get Token and check if there
   let token;
   if (
     req.headers.authorization &&
     req.headers.authorization.startsWith("Bearer")
   ) {
     token = req.headers.authorization.split(" ")[1];
+  } else if (req.cookies.jwt) {
+    token = req.cookies.jwt;
   }
-  //console.log(token);
+  console.log(token);
 
   if (!token) {
     return next(new AppError("You are not logged in", 401));
@@ -202,6 +209,7 @@ exports.forgotPassword = catchAsync(async (req, res, next) => {
 
   const resetToken = user.createPasswordResetToken();
   await user.save({ validateBeforeSave: false });
+
   //Send it to user email
   //console.log(user);
 
@@ -209,7 +217,7 @@ exports.forgotPassword = catchAsync(async (req, res, next) => {
     "host"
   )}/api/users/resetPassword/${resetToken}`;
 
-  const message = `Forgot your password? \nSubmit a PATCH request with your new password and passwordConfirm to: ${resetURL}.\nIf you didn't forget your password, please ignore this email!`;
+  const message = `Forgot your password? \n Paste this Code on your screen ${resetToken} and enter your New Password.\nIf you didn't forget your password, please ignore this email!`;
 
   try {
     await sendEmail({
@@ -234,7 +242,7 @@ exports.forgotPassword = catchAsync(async (req, res, next) => {
 exports.resetPassword = catchAsync(async (req, res, next) => {
   const resetToken = crypto
     .createHash("sha256")
-    .update(req.params.token)
+    .update(req.body.token)
     .digest("hex");
 
   const user = await User.findOne({
