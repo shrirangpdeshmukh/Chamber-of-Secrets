@@ -20,12 +20,13 @@ const createToken = (user, statusCode, res) => {
 
   res.cookie("jwt", token, cookieOptions);
 
+  user.password = undefined;
+
   res.status(statusCode).json({
     status: "success",
     token,
     data: {
-      name: user.name,
-      email: user.email,
+      user,
     },
   });
 };
@@ -38,9 +39,7 @@ exports.login = catchAsync(async (req, res, next) => {
     return next(new AppError("Please provide a valid email and password", 400));
   }
 
-  const user = await User.findOne({ email: email, verified: true }).select(
-    "+password"
-  );
+  const user = await User.findOne({ email: email }).select("+password");
 
   if (!user || !(await user.correctPassword(password, user.password))) {
     return next(new AppError("Invalid Email or Password", 401));
@@ -58,10 +57,6 @@ exports.signup = catchAsync(async (req, res, next) => {
 
   const signToken = newUser.createSignUpToken();
   await newUser.save({ validateBeforeSave: false });
-
-  const signupURL = `${req.protocol}://${req.get(
-    "host"
-  )}/api/users/signUpConfirm/${signToken}`;
 
   const message = `You are just one Step to begin your fabulous journey on Chamber Of Secrets\n Paste ${signToken} in the dialog box on your screen.\n This Code is valid for 10 mins`;
 
@@ -164,7 +159,7 @@ exports.checkCorrectUser = catchAsync(async (req, res, next) => {
   }
 
   //
-  const check = req.user.id == post.user;
+  const check = req.user.id == post.user._id;
   console.log(check);
   if (!check) {
     return next(
@@ -178,7 +173,6 @@ exports.checkCorrectUser = catchAsync(async (req, res, next) => {
 
 exports.guestSession = catchAsync(async (req, res, next) => {
   const guest = await User.find({ name: "Guest" });
-  //console.log(guest);
   const token = signToken(guest._id);
 
   res.status(200).json({
@@ -190,11 +184,10 @@ exports.guestSession = catchAsync(async (req, res, next) => {
 });
 
 exports.logout = catchAsync(async (req, res, next) => {
-  res.status(200).json({
-    status: "success",
-    //user: req.user,
-    message: "Logged Out succesfully",
+  res.cookie("jwt", "loggedout", {
+    httpOnly: false,
   });
+  res.status(200).json({ status: "success", message: "Logout successful" });
 });
 
 exports.forgotPassword = catchAsync(async (req, res, next) => {

@@ -8,6 +8,11 @@ const postSchema = new mongoose.Schema(
       required: [true, "Post can not be empty"],
     },
 
+    title: {
+      type: String,
+      default: "Demo",
+    },
+
     createdAt: {
       type: Date,
       default: Date.now(),

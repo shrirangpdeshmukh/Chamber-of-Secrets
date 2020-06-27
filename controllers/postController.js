@@ -71,3 +71,16 @@ exports.downvotePost = catchAsync(async (req, res, next) => {
     data: post,
   });
 });
+
+exports.getAllPostsbyUser = catchAsync(async (req, res, next) => {
+  const docs = await Post.find();
+  const docs_new = await docs.filter((doc) => {
+    return doc.user.id === req.user.id;
+  });
+
+  res.status(200).json({
+    status: "success",
+    results: docs_new.length,
+    doc: docs_new,
+  });
+});

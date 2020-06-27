@@ -42,7 +42,7 @@ exports.updateOne = (Model) =>
     }
     res.status(200).json({
       status: "success",
-      message: "document successfully updated",
+      message: "Document successfully updated",
       doc,
     });
   });
@@ -65,14 +65,13 @@ exports.getAll = (Model) =>
   catchAsync(async (req, res, next) => {
     //console.log(req.query);
     let filter = {};
-    if (req.params.userId) filter = { user: req.params.userId };
+    if (req.params.userId) filter = { "user._id": req.params.userId };
 
     let features = new QuerySelector(Model.find(filter), req.query)
       .filter()
       .sort()
       .limit()
       .pagination();
-
     const docs = await features.query;
 
     res.status(200).json({
@@ -91,14 +90,10 @@ exports.blacklistOne = (Model) =>
       blacklistedBy: req.user.id,
     });
 
-    if (!doc) {
-      return next(
-        new AppError(`No Document find with id ${req.params.id}`, 404)
-      );
-    }
-
     res.status(200).json({
       status: "success",
       message: "Document successfully blacklisted",
     });
+
+    // next();
   });
