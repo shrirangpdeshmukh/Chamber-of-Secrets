@@ -3,11 +3,11 @@ const authController = require("./../controllers/authController");
 
 const express = require("express");
 
-const router = express.Router({ mergeParams: true });
+const router = express.Router();
 
 router.get(
-  "/myposts",
-  authController.protect,
+  "/:id/userPosts",
+  // authController.protect,
   postController.getAllPostsbyUser
 );
 

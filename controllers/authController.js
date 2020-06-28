@@ -76,7 +76,7 @@ exports.signup = catchAsync(async (req, res, next) => {
     newUser.signUpTokenExpires = undefined;
     await user.save({ validateBeforeSave: false });
 
-    return next(new AppError("There was an error sending email"), 500);
+    return next(new AppError("There was an error sending email", 500));
   }
 });
 
@@ -92,7 +92,7 @@ exports.signUpConfirm = catchAsync(async (req, res, next) => {
   });
 
   if (!user) {
-    return next(new AppError("Token is invalid"), 403);
+    return next(new AppError("Token is invalid", 403));
   }
 
   user.verified = true;
