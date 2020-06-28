@@ -39,7 +39,9 @@ exports.login = catchAsync(async (req, res, next) => {
     return next(new AppError("Please provide a valid email and password", 400));
   }
 
-  const user = await User.findOne({ email: email }).select("+password");
+  const user = await User.findOne({ email: email, verified: true }).select(
+    "+password"
+  );
 
   if (!user || !(await user.correctPassword(password, user.password))) {
     return next(new AppError("Invalid Email or Password", 401));
@@ -74,7 +76,7 @@ exports.signup = catchAsync(async (req, res, next) => {
   } catch (err) {
     newUser.signUpToken = undefined;
     newUser.signUpTokenExpires = undefined;
-    await user.save({ validateBeforeSave: false });
+    await newUser.save({ validateBeforeSave: false });
 
     return next(new AppError("There was an error sending email", 500));
   }
@@ -89,6 +91,7 @@ exports.signUpConfirm = catchAsync(async (req, res, next) => {
   const user = await User.findOne({
     signUpToken: hashedToken,
     signUpTokenExpires: { $gt: Date.now() },
+    verified: false,
   });
 
   if (!user) {
@@ -122,7 +125,7 @@ exports.protect = catchAsync(async (req, res, next) => {
   const decoded = await promisify(jwt.verify)(token, process.env.MY_SECRET);
   //console.log(decoded);
   //3 check if user still exists
-  const freshUser = await User.findById(decoded.id);
+  const freshUser = await User.findOne({ _id: decoded.id, verified: true });
   if (!freshUser) {
     return next(new AppError("User not found", 401));
   }
@@ -172,15 +175,13 @@ exports.checkCorrectUser = catchAsync(async (req, res, next) => {
 });
 
 exports.guestSession = catchAsync(async (req, res, next) => {
-  const guest = await User.find({ name: "Guest" });
-  const token = signToken(guest._id);
-
-  res.status(200).json({
-    status: "success",
-    token,
-    message:
-      "Guest session has been created, you can create posts but not modify/delete , upvote/downvote them.",
-  });
+  const guest = await User.findOne({ name: "Guest" });
+  createToken(guest, 200, res);
+  // const guest = await User.collection.insertOne(user);
+  // console.log(guest);
+  // res.status(200).json({
+  //   guest,
+  // });
 });
 
 exports.logout = catchAsync(async (req, res, next) => {
@@ -205,10 +206,6 @@ exports.forgotPassword = catchAsync(async (req, res, next) => {
 
   //Send it to user email
   //console.log(user);
-
-  const resetURL = `${req.protocol}://${req.get(
-    "host"
-  )}/api/users/resetPassword/${resetToken}`;
 
   const message = `Forgot your password? \n Paste this Code on your screen ${resetToken} and enter your New Password.\nIf you didn't forget your password, please ignore this email!`;
 

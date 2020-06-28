@@ -5,11 +5,7 @@ const express = require("express");
 
 const router = express.Router();
 
-router.get(
-  "/:id/userPosts",
-  // authController.protect,
-  postController.getAllPostsbyUser
-);
+router.get("/:id/userPosts", postController.getAllPostsbyUser);
 
 router.patch(
   "/:id/blacklist",
@@ -53,5 +49,7 @@ router
     authController.checkCorrectUser,
     postController.updatePost
   );
+
+// router.route("/guestPost").post(authController.protect, authController.restrictTo("guest"), )
 
 module.exports = router;

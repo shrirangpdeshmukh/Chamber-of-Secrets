@@ -65,7 +65,7 @@ exports.getAll = (Model) =>
   catchAsync(async (req, res, next) => {
     //console.log(req.query);
     let filter = {};
-    if (req.params.userId) filter = { "user._id": req.params.userId };
+    if (Model == "User") filter = { verified: true };
 
     let features = new QuerySelector(Model.find(filter), req.query)
       .filter()
