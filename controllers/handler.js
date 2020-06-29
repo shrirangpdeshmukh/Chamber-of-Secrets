@@ -1,6 +1,7 @@
 const AppError = require("./../utils/appError");
 const catchAsync = require("./../utils/catchAsync");
 const QuerySelector = require("./../utils/querySelector");
+const User = require("./../models/userModel");
 
 exports.createOne = (Model) =>
   catchAsync(async (req, res, next) => {
@@ -63,10 +64,11 @@ exports.deleteOne = (Model) =>
 
 exports.getAll = (Model) =>
   catchAsync(async (req, res, next) => {
-    //console.log(req.query);
     let filter = {};
-    if (Model == "User") filter = { verified: true };
+    if (Model === User) filter = { verified: true, role: { $ne: "guest" } };
 
+    // console.log(Model ==  )
+    // if (Model === )
     let features = new QuerySelector(Model.find(filter), req.query)
       .filter()
       .sort()

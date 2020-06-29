@@ -51,6 +51,11 @@ exports.blacklistUser = catchAsync(async (req, res, next) => {
   res.status(200).json({
     status: "success",
     message:
-      "User and All his posts successfully blacklisted\n Token sent to mail",
+      "User and All his posts successfully blacklisted\n E-mail sent to user regarding this.",
   });
 });
+
+// exports.setUserConditions = catchAsync(async (next) => {
+//   const users =
+
+// });

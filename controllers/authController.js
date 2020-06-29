@@ -83,6 +83,8 @@ exports.signup = catchAsync(async (req, res, next) => {
 });
 
 exports.signUpConfirm = catchAsync(async (req, res, next) => {
+  if (!req.body.token) return next(new AppError("Please Enter a Token", 400));
+
   const hashedToken = crypto
     .createHash("sha256")
     .update(req.body.token)
@@ -207,7 +209,7 @@ exports.forgotPassword = catchAsync(async (req, res, next) => {
   //Send it to user email
   //console.log(user);
 
-  const message = `Forgot your password? \n Paste this Code on your screen ${resetToken} and enter your New Password.\nIf you didn't forget your password, please ignore this email!`;
+  const message = `Forgot your password? \n Paste this Code on your screen\n  ${resetToken} \n and enter your New Password.\n If you didn't forget your password, please ignore this email!`;
 
   try {
     await sendEmail({
