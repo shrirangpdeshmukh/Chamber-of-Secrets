@@ -60,7 +60,7 @@ exports.signup = catchAsync(async (req, res, next) => {
   const signToken = newUser.createSignUpToken();
   await newUser.save({ validateBeforeSave: false });
 
-  const message = `You are just one Step to begin your fabulous journey on Chamber Of Secrets\n Paste ${signToken} in the dialog box on your screen.\n This Code is valid for 10 mins`;
+  const message = `You are just one Step to begin your fabulous journey on Chamber Of Secrets\n Paste the token in the dialog box on your website.\n This Code is valid for 10 mins\n \n ${signToken} `;
 
   try {
     await sendEmail({
@@ -118,7 +118,7 @@ exports.protect = catchAsync(async (req, res, next) => {
   } else if (req.cookies.jwt) {
     token = req.cookies.jwt;
   }
-  console.log(token);
+  // console.log(token);
 
   if (!token) {
     return next(new AppError("You are not logged in", 401));
@@ -165,7 +165,7 @@ exports.checkCorrectUser = catchAsync(async (req, res, next) => {
 
   //
   const check = req.user.id == post.user._id;
-  console.log(check);
+  // console.log(check);
   if (!check) {
     return next(
       new AppError(
@@ -209,7 +209,7 @@ exports.forgotPassword = catchAsync(async (req, res, next) => {
   //Send it to user email
   //console.log(user);
 
-  const message = `Forgot your password? \n Paste this Code on your screen\n  ${resetToken} \n and enter your New Password.\n If you didn't forget your password, please ignore this email!`;
+  const message = `Forgot your password? \n Paste this Code on your screen and enter your New Password.\n If you didn't forget your password, please ignore this email!\n  ${resetToken} \n `;
 
   try {
     await sendEmail({

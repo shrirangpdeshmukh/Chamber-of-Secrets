@@ -105,8 +105,8 @@ userSchema.methods.createSignUpToken = function () {
     .update(signToken)
     .digest("hex");
 
-  console.log(signToken);
-  console.log(this.signUpToken);
+  // console.log(signToken);
+  // console.log(this.signUpToken);
 
   this.signUpTokenExpires = Date.now() + 10 * 60 * 1000;
 

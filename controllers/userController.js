@@ -36,12 +36,12 @@ exports.blacklistUser = catchAsync(async (req, res, next) => {
     })
   );
 
-  const message = `You have been blacklisted by one of the admin members of our site.`;
+  const message = `You have been blacklisted by one of the admin members of our site.\n You can not access the restricted features of our site. \n`;
 
   try {
     await sendEmail({
       email: user.email,
-      subject: "You have Blacklisted from the Chamber of Secrets",
+      subject: "You are Blacklisted from the Chamber of Secrets",
       message,
     });
   } catch (err) {
@@ -76,12 +76,12 @@ exports.whitelistUser = catchAsync(async (req, res, next) => {
     })
   );
 
-  const message = `You have been whitelisted by one of the admin members of our site.`;
+  const message = `You have been whitelisted by one of the admin members of our site\n Now you can access the features of the site again.`;
 
   try {
     await sendEmail({
       email: user.email,
-      subject: "You have been Whitelisted from the Chamber of Secrets",
+      subject: "Congratulations!!!! ",
       message,
     });
   } catch (err) {
