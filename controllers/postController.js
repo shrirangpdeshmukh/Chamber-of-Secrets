@@ -92,3 +92,29 @@ exports.getAllPostsbyUser = catchAsync(async (req, res, next) => {
     data: { doc: docs_new },
   });
 });
+
+exports.whitelistPost = catchAsync(async (req, res, next) => {
+  const doc = await Post.findByIdAndUpdate(req.params.id, {
+    blacklisted: false,
+    blacklistedBy: null,
+  });
+
+  if (!doc) return next(new AppError("No Post with this id", 404));
+
+  res.status(200).json({
+    status: "success",
+    message: "Post successfully whitelisted",
+    doc,
+  });
+});
+
+exports.getBlacklistedPosts = catchAsync(async (req, res, next) => {
+  const docs = await Post.find({ blacklisted: true });
+  res.status(200).json({
+    status: "success",
+    results: docs.length,
+    data: {
+      doc: docs,
+    },
+  });
+});

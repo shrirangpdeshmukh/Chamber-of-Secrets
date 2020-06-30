@@ -254,3 +254,17 @@ exports.resetPassword = catchAsync(async (req, res, next) => {
 
   createToken(user, 200, res);
 });
+
+exports.changePassword = catchAsync(async (req, res, next) => {
+  const user = await User.findById(req.user.id);
+  if (!user) return next(new AppError("No User found with this id", 404));
+
+  user.password = req.body.password;
+  user.passwordConfirm = req.body.passwordConfirm;
+  await user.save();
+
+  res.status(200).json({
+    status: "success",
+    message: "Password changed successfully",
+  });
+});

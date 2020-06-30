@@ -17,6 +17,13 @@ router.post("/guestSession", authController.guestSession);
 router.post("/forgotPassword", authController.forgotPassword);
 router.patch("/resetPassword", authController.resetPassword);
 
+router.patch(
+  "/changePassword",
+  authController.protect,
+  authController.restrictTo("admin", "user"),
+  authController.changePassword
+);
+
 router.post("/logout", authController.protect, authController.logout);
 
 router.patch(
@@ -24,6 +31,27 @@ router.patch(
   authController.protect,
   authController.restrictTo("admin"),
   userController.blacklistUser
+);
+
+router.patch(
+  "/:id/whitelist",
+  authController.protect,
+  authController.restrictTo("admin"),
+  userController.whitelistUser
+);
+
+router.patch(
+  "/:id/makeAdmin",
+  authController.protect,
+  authController.restrictTo("admin"),
+  userController.makeUserAdmin
+);
+
+router.patch(
+  "/:id/removeAdmin",
+  authController.protect,
+  authController.restrictTo("admin"),
+  userController.removeAdmin
 );
 
 router

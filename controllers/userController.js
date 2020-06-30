@@ -55,7 +55,74 @@ exports.blacklistUser = catchAsync(async (req, res, next) => {
   });
 });
 
-// exports.setUserConditions = catchAsync(async (next) => {
-//   const users =
+exports.whitelistUser = catchAsync(async (req, res, next) => {
+  const user = await User.findByIdAndUpdate(req.params.id, {
+    blacklisted: false,
+    blacklistedBy: null,
+  });
 
-// });
+  if (!user) {
+    return next(new AppError(`No Document find with id ${req.params.id}`, 404));
+  }
+
+  const docs = await Post.find({ user: user._id });
+
+  docs.forEach(
+    catchAsync(async (doc) => {
+      await Post.findByIdAndUpdate(doc._id, {
+        blacklisted: false,
+        blacklistedBy: null,
+      });
+    })
+  );
+
+  const message = `You have been whitelisted by one of the admin members of our site.`;
+
+  try {
+    await sendEmail({
+      email: user.email,
+      subject: "You have been Whitelisted from the Chamber of Secrets",
+      message,
+    });
+  } catch (err) {
+    return next(new AppError("There was an error sending email"), 500);
+  }
+
+  res.status(200).json({
+    status: "success",
+    message:
+      "User and All his posts successfully whitelisted\n E-mail sent to user regarding this.",
+  });
+});
+
+exports.makeUserAdmin = catchAsync(async (req, res, next) => {
+  const user = await User.findOneAndUpdate(
+    { _id: req.params.id, blacklisted: { $ne: true } },
+    {
+      role: "admin",
+    }
+  );
+
+  if (!user) return next(new AppError("No User found with this id", 404));
+
+  res.status(200).json({
+    status: "success",
+    message: "Admin Added Successfully",
+  });
+});
+
+exports.removeAdmin = catchAsync(async (req, res, next) => {
+  const user = await User.findOneAndUpdate(
+    { _id: req.params.id, blacklisted: { $ne: true } },
+    {
+      role: "user",
+    }
+  );
+
+  if (!user) return next(new AppError("No User found with this id", 404));
+
+  res.status(200).json({
+    status: "success",
+    message: "Admin Removed Successfully",
+  });
+});

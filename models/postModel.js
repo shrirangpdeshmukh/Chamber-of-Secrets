@@ -68,7 +68,7 @@ postSchema.pre(/^find/, function (next) {
 });
 
 postSchema.pre(/^find/, function (next) {
-  this.find({ blacklisted: { $ne: true }, user: { $ne: null } });
+  this.find({ user: { $ne: null } });
   next();
 });
 

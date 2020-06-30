@@ -7,7 +7,7 @@ const handleCatchError = (err) => {
 
 const handleDuplicateFiles = (err) => {
   const value = err.errmsg.match(/(["'])(\\?.)*?\1/)[0];
-  console.log(value);
+  // console.log(value);
 
   const message = `Duplicate field value: ${value}. Please use another value!`;
   return new AppError(message, 400);
@@ -18,6 +18,13 @@ const handleValidationError = (err) => {
 
   const message = `Invalid input data. ${errors.join(". ")}`;
   return new AppError(message, 400);
+};
+
+const handleJWTError = (err) => {
+  return new AppError(
+    "You are not logged in. Please Log in to access this. ",
+    401
+  );
 };
 
 const sendErrorProd = (err, res) => {
@@ -57,6 +64,8 @@ module.exports = (err, req, res, next) => {
     if (error.code === 11000) error = handleDuplicateFiles(error);
 
     if (error.name === "ValidationError") error = handleValidationError(error);
+
+    if (error.name === "JsonWebTokenError") error = handleJWTError(error);
 
     sendErrorProd(error, res);
   } else {

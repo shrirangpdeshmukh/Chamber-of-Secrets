@@ -7,11 +7,25 @@ const router = express.Router();
 
 router.get("/:id/userPosts", postController.getAllPostsbyUser);
 
+router.get(
+  "/blacklisted",
+  authController.protect,
+  authController.restrictTo("admin"),
+  postController.getBlacklistedPosts
+);
+
 router.patch(
   "/:id/blacklist",
   authController.protect,
   authController.restrictTo("admin"),
   postController.blacklistPost
+);
+
+router.patch(
+  "/:id/whitelist",
+  authController.protect,
+  authController.restrictTo("admin"),
+  postController.whitelistPost
 );
 
 router.post(
