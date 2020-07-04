@@ -70,11 +70,6 @@ userSchema.pre("save", async function (next) {
   next();
 });
 
-// userSchema.pre(/^find/, function (next) {
-//   this.find({ blacklisted: { $ne: true } });
-//   next();
-// });
-
 userSchema.methods.correctPassword = async function (
   candidatePassword,
   userPassword

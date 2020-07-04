@@ -73,23 +73,26 @@ exports.downvotePost = catchAsync(async (req, res, next) => {
 });
 
 exports.getAllPostsbyUser = catchAsync(async (req, res, next) => {
+  let user, id_required;
+
+  if (req.params.id && req.params.id !== process.env.GUEST_ID) {
+    user = await User.findOne({ _id: req.params.id, blacklisted: false });
+    id_required = user.id;
+  } else if (req.body.id && req.body.id !== process.env.GUEST_) {
+    user = await User.findOne({ _id: req.body.id, blacklisted: false });
+    id_required = user.id;
+  }
   const docs = await Post.find();
   let docs_new = [];
   if (docs.length) {
-    // console.log(req.params, req.users);
     docs_new = docs.filter((doc) => {
-      let id_required;
-      if (req.params.id) id_required = req.params.id;
-      else if (req.user) id_required = req.user.id;
-
-      if (id_required === process.env.GUEST_ID) id_required = null;
       return doc.user.id === id_required;
     });
   }
   res.status(200).json({
     status: "success",
     results: docs_new.length,
-    data: { doc: docs_new },
+    data: { doc: docs_new, user: user.name },
   });
 });
 
