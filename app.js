@@ -1,5 +1,6 @@
 const express = require("express");
 const morgan = require("morgan");
+const path = require("path");
 const helmet = require("helmet");
 const mongoSanitize = require("express-mongo-sanitize");
 const xss = require("xss-clean");
@@ -13,7 +14,7 @@ const userRouter = require("./routes/userRoutes.js");
 const postRouter = require("./routes/postRoutes.js");
 const app = express();
 
-app.use(cors({ origin: "http://localhost:3000", credentials: true }));
+app.use(cors());
 
 app.options("*", cors());
 
@@ -27,14 +28,24 @@ app.use(xss());
 
 app.use(express.json());
 app.use(cookieParser());
+if (process.env.NODE_ENV !== "production") {
+  app.use(morgan("dev"));
+}
 
-app.use(morgan("dev"));
 app.use("/api/users", userRouter);
 app.use("/api/posts", postRouter);
 
 app.all("*", (req, res, next) => {
   next(new AppError(`No url found found for ${req.url}`, 404));
 });
+
+if (process.env.NODE_ENV === "production") {
+  app.use(express.static("/client/build"));
+
+  app.get("*", (req, res) => {
+    res.sendFile(path.resolve(__dirname, "client", "build", "index.html"));
+  });
+}
 
 app.use(errorHandler);
 module.exports = app;
