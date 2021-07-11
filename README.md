@@ -8,11 +8,17 @@ development.
 
 ### Project: Dummy Social Media
 
+## Technologies used
+
+- **NodeJs** -      Evented I/O for the backend
+- **Express** -     Fast node.js network app framework
+- **MongoDB** -     NoSQL Database
+- **React.js** -    Javascript llibrary to build user frameworks.
+- **React BootStrap** -  React components based on Bootstrap, responsive web application for all screen sizes.
+
+
 #### Features:
-- Full stack MERN app
-- No usage of template engines. (so use react for frontend)
 - Should be an SPA
-- SPA should get JSON data for rendering from the backend logic.
 - Website will be a place where we can view posts.
 - Posts are simple -> text paragraphs.
 - Users can sign up
